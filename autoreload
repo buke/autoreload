@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+##############################################################################
+#    AutoReload Process
+#    wangbuke <wangbuke@gmail.com>
+#    taken from https://github.com/stevekrenzel/autoreload
+#    
+#    To use autoreload:    
+#    1. Make sure the script is executable by running chmod +x autoreload
+#    2. Run ./autoreload <command to run and reload> 
+#       e.g: $ ./autoreload openerp-server
+#    
+##############################################################################
+
+import sys
+import subprocess
+import time
+import os
+import signal
+
+PATH = '.'
+WAIT = 1
+
+def start_process(cmd):
+    if os.name == 'nt':
+        process = subprocess.Popen(command, shell=True)
+    else:
+        process = subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid) 
+    return process
+
+def stop_process(process):
+    if os.name == 'nt':
+        process.kill()
+    else:
+        os.killpg(process.pid, signal.SIGTERM) # Send the signal to all the process groups
+    process.wait()
+
+def file_filter(name):
+    return (not name.startswith(".")) and (not name.endswith(".pyc"))  and (not name.endswith(".pyo"))and (not name.endswith(".swp"))
+
+def file_times(path):
+    for root, dirs, files in os.walk(path):
+        for file in filter(file_filter, files):
+            yield os.stat(os.path.join(root, file)).st_mtime
+
+def print_stdout(process):
+    stdout = process.stdout
+    if stdout != None:
+        print stdout
+
+if __name__ == "__main__":
+
+    command = ' '.join(sys.argv[1:])
+    process = start_process(command)
+    last_mtime = max(file_times(PATH))
+
+    while True:
+        try:
+            print_stdout(process)
+            max_mtime = max(file_times(PATH))
+            if max_mtime > last_mtime:
+                last_mtime = max_mtime
+                print 'Restarting process...'
+                stop_process(process)
+                process = start_process(command)
+            time.sleep(WAIT)
+        except (KeyboardInterrupt, SystemExit):
+                print "Caught KeyboardInterrupt, terminating process"
+                stop_process(process)
+                break
+
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
