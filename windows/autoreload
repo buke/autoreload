@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ##############################################################################
-#    AutoReload Process
+#    AutoReload Process For Windows
 #    wangbuke <wangbuke@gmail.com>
 #    taken from https://github.com/stevekrenzel/autoreload
 #    
 #    To use autoreload:    
-#    1. Make sure the script is executable by running chmod +x autoreload
-#    2. Run ./autoreload <command to run and reload> 
-#       e.g: $ ./autoreload openerp-server
+#    Run ./autocompile.py <path> <ext1,ext2,extn> <cmd> 
+#       e.g: $ python autoreload "./openerp" ".py,.xml" "python openerp-server -c openerp-server.conf"
 #    
 ##############################################################################
 
@@ -16,31 +15,27 @@ import sys
 import subprocess
 import time
 import os
-import signal
 
 PATH = '.'
-WAIT = 1
+WAIT = 3
 
 def start_process(cmd):
-    if os.name == 'nt':
-        process = subprocess.Popen(command, shell=True)
-    else:
-        process = subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid) 
+    process = subprocess.Popen(command, shell=True)
     return process
 
 def stop_process(process):
-    if os.name == 'nt':
-        process.kill()
-    else:
-        os.killpg(process.pid, signal.SIGTERM) # Send the signal to all the process groups
+    process.kill()
     process.wait()
 
-def file_filter(name):
-    return (not name.startswith(".")) and (not name.endswith(".pyc"))  and (not name.endswith(".pyo"))and (not name.endswith(".swp"))
+def file_filter(extensions):
+    def my_filter(name):
+        return any([name.endswith(ext) for ext in extensions])
+    return my_filter
 
-def file_times(path):
+def file_times(path, extension):
+    extensions = extension.split(',')
     for root, dirs, files in os.walk(path):
-        for file in filter(file_filter, files):
+        for file in filter(file_filter(extensions=extensions), files):
             yield os.stat(os.path.join(root, file)).st_mtime
 
 def print_stdout(process):
@@ -51,13 +46,17 @@ def print_stdout(process):
 if __name__ == "__main__":
 
     command = ' '.join(sys.argv[1:])
+    path = sys.argv[1]
+    extension = sys.argv[2]
+    command = sys.argv[3]
+
     process = start_process(command)
-    last_mtime = max(file_times(PATH))
+    last_mtime = max(file_times(PATH,extension))
 
     while True:
         try:
             print_stdout(process)
-            max_mtime = max(file_times(PATH))
+            max_mtime = max(file_times(PATH,extension))
             if max_mtime > last_mtime:
                 last_mtime = max_mtime
                 print 'Restarting process...'
