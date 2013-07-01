@@ -7,15 +7,15 @@ To use autoreload for Linux:
 --------------------------------
 1. Make sure the script is executable by running chmod +x autoreload
 
-2. Run ./autoreload <path> <ext1,ext2,extn> <cmd> 
+2. Run `./autoreload <path> <ext1,ext2,extn> <cmd> `
 
-e.g: $ ./autoreload '.' '.py,.xml,.conf' './openerp-server -c openerp-server.conf'
+e.g: `$ ./autoreload '.' '.py,.xml,.conf' './openerp-server -c openerp-server.conf'`
 
 
 To use autoreload for windows:
 --------------------------------
 
-Run ./autocompile.py <path> <ext1,ext2,extn> <cmd> 
+Run `autoreload.py <path> <ext1,ext2,extn> <cmd> `
 
-e.g: $ python autoreload "./openerp" ".py,.xml" "python openerp-server -c openerp-server.conf"
+e.g: `python autoreload "./openerp" ".py,.xml" "python openerp-server -c openerp-server.conf"`
 
