@@ -6,7 +6,7 @@
 #    taken from https://github.com/stevekrenzel/autoreload
 #    
 #    To use autoreload:    
-#    Run ./autocompile.py <path> <ext1,ext2,extn> <cmd> 
+#    Run ./autoreload.py <path> <ext1,ext2,extn> <cmd> 
 #       e.g: $ python autoreload "./openerp" ".py,.xml" "python openerp-server -c openerp-server.conf"
 #    
 ##############################################################################

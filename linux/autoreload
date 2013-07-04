@@ -3,7 +3,6 @@
 ##############################################################################
 #    AutoReload Process Using inofify 
 #    wangbuke <wangbuke@gmail.com>
-#    taken from https://github.com/stevekrenzel/autoreload
 #    
 #    To use autoreload:    
 #    1. Make sure the script is executable by running chmod +x autoreload
@@ -69,25 +68,30 @@ class OnChangeHandler(pyinotify.ProcessEvent):
         if stdout != None:
             print stdout
 
-    def process_IN_CREATE(self, event):
-        if any(event.pathname.endswith(ext) for ext in self.extensions) or "IN_ISDIR" in event.maskname:
-            self._restart_process()
-
-    def process_IN_DELETE(self, event):
+    def _process_event(self, event):
         if any(event.pathname.endswith(ext) for ext in self.extensions) or "IN_ISDIR" in event.maskname:
             self._restart_process()
 
     def process_IN_CLOSE_WRITE(self, event):
-        if any(event.pathname.endswith(ext) for ext in self.extensions) or "IN_ISDIR" in event.maskname:
-            self._restart_process()
+        self._process_event(event)
 
     def process_IN_MOVED_FROM(self, event):
-        if any(event.pathname.endswith(ext) for ext in self.extensions) or "IN_ISDIR" in event.maskname:
-            self._restart_process()
+        self._process_event(event)
 
     def process_IN_MOVED_TO(self, event):
-        if any(event.pathname.endswith(ext) for ext in self.extensions) or "IN_ISDIR" in event.maskname:
-            self._restart_process()
+        self._process_event(event)
+
+    def process_IN_CREATE(self, event):
+        self._process_event(event)
+
+    def process_IN_DELETE(self, event):
+        self._process_event(event)
+
+    def process_IN_DELETE_SELF(self, event):
+        self._process_event(event)
+
+    def process_IN_MOVE_SELF(self, event):
+        self._process_event(event)
 
 def autoreload(path, extension, cmd):
     wm = pyinotify.WatchManager()
